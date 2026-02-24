@@ -13,22 +13,26 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
+    needs: build
     steps:
       - run: echo "This is a test step"
 
   integration:
     runs-on: ubuntu-22.04
+    needs: test
+    continue-on-error: true
     steps:
       - run: echo "This is an integration step"
       - run: exit 1
-    allow_failure: true
 
   artifact:
     runs-on: ubuntu-22.04
+    needs: integration
     steps:
-      - run: echo "hello" > hello.txt
+      - run: echo "This is a test step"
 
   prod:
     runs-on: ubuntu-22.04
+    needs: artifact
     steps:
       - run: echo "This is a deploy step"
