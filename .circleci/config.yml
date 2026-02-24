@@ -1,64 +1,48 @@
 jobs:
   build:
     docker:
-      - image: cimg/base:stable                   # similar to "image" in GitLab
+      - image: python:3.6                   # similar to "image" in GitLab
     steps:
       - checkout
-      - run: echo "This is a build step"          # similar to "script" in GitLab
+      - run: |                              # similar to "script" in GitLab
+          pip install -r requirements.txt
+          python manage.py check
 
   test:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.6
     steps:
       - checkout
-      - run: echo "This is a test step"
+      - run: |
+          pip install -r requirements.txt
+          python manage.py test taskManager
 
   integration:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.6
     steps:
       - checkout
       - run:
           command: |
             echo "This is an integration step"
             exit 1
-  artifact:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: Create artifact file
-          command: echo "hello" > hello.txt
-      - store_artifacts:
-          path: hello.txt
-          destination: hello.txt
+          when: on_fail                   # Even if the job fails, continue to the next stages
 
   prod:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.6
     steps:
       - checkout
-      - run: echo "This is a deploy step"
+      - run: echo "This is a 'deploy' step."
 
 workflows:
   version: 2
   django:
     jobs:
-      - build:
-          filters:
-            branches:
-              only: main
-      - test:
-          requires:
-            - build
-      - integration:
-          requires:
-            - test
-      - artifact:
+      - build
+      - test
+      - integration
+      - prod:
+          type: approval
           requires:
             - integration
-      - prod:
-          requires:
-            - artifact
-          type: approval
