@@ -33,7 +33,13 @@ jobs:
       - checkout
 
       - run: |
-          echo  | docker login -u  --password-stdin
+          if [ -z "" ] || [ -z "" ]; then
+            echo "Docker credentials are missing!"
+            exit 1
+          fi
+
+          echo "" | docker login             --username ""             --password-stdin
+
           docker build -t /django.nv .   # Build the application into Docker image
           docker push /django.nv         # Push the image into registry
   prod:
