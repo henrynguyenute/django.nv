@@ -26,28 +26,13 @@ jobs:
           command: |
             echo "This is an integration step"
             exit 1
-          when: on_fail                   # Even if the job fails, continue to the next stages
-  release:
-    machine: true                                        # What is this for?
-    steps:
-      - checkout
 
-      - run: |
-          if [ -z "" ] || [ -z "" ]; then
-            echo "Docker credentials are missing!"
-            exit 1
-          fi
-
-          echo "" | docker login             --username ""             --password-stdin
-
-          docker build -t /django.nv .   # Build the application into Docker image
-          docker push /django.nv         # Push the image into registry
   prod:
     docker:
       - image: python:3.6
     steps:
       - checkout
-      - run: echo "This is a 'deploy' step."
+      - run: echo "This is a deploy step."
 
 workflows:
   version: 2
@@ -55,7 +40,6 @@ workflows:
     jobs:
       - build
       - test
-      - release
       - integration
       - prod:
           type: approval
